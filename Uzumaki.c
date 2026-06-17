@@ -10,7 +10,7 @@
 
 char tabuleiro[TAM][TAM];
 
-// Flags de controle das regras estranhas
+// Flags para as regras estranhas
 int p1_perde_vez = 0, p2_perde_vez = 0;
 int p1_amaldicoado = 0, p2_amaldicoado = 0;
 int p1_mal_l = -1, p1_mal_c = -1; 
@@ -66,7 +66,7 @@ int checarEfeitoRebote(int l, int c, char seu_simbolo) {
     return 0;
 }
 
-// Checa se o humano colou no Uzumaki voluntariamente
+// Checa se alguma peça está colada na uzumaki
 int checarMaldicao(int l, int c) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -80,7 +80,7 @@ int checarMaldicao(int l, int c) {
     return 0;
 }
 
-// NOVA FUNÇÃO: O Uzumaki espalha a maldição para as peças ao redor de onde ele acabou de jogar
+// Função: uzumaki espalha sua maldição pelo tabuleiro
 void espalharMaldicaoUzumaki(int l, int c) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
