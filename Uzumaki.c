@@ -146,7 +146,7 @@ void jogadaUzumaki() {
     tabuleiro[l][c] = UZUMAKI;
     printf("O Uzumaki expandiu sua espiral em [%d, %d]!\n", l + 1, c + 1);
     
-    // Ativa a contaminação ativa nas peças vizinhas!
+    // Ativa a contaminaçao da uzumaki
     espalharMaldicaoUzumaki(l, c);
 }
 
