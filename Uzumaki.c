@@ -8,15 +8,7 @@
 #define UZUMAKI '@' 
 #define VAZIO '.'
 
-char tabuleiro[TAM][TAM];
-
-// Flags para as regras estranhas
-int p1_perde_vez = 0, p2_perde_vez = 0;
-int p1_amaldicoado = 0, p2_amaldicoado = 0;
-int p1_mal_l = -1, p1_mal_c = -1; 
-int p2_mal_l = -1, p2_mal_c = -1; 
-
-void inicializarTabuleiro() {
+void inicializarTabuleiro(char tabuleiro[TAM][TAM]) {
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
             tabuleiro[i][j] = VAZIO;
@@ -24,7 +16,7 @@ void inicializarTabuleiro() {
     }
 }
 
-void desenharTabuleiro() {
+void desenharTabuleiro(char tabuleiro[TAM][TAM]) {
     printf("\n   1   2   3   4   5\n");
     printf(" +---+---+---+---+---+\n");
     for (int i = 0; i < TAM; i++) {
@@ -40,7 +32,7 @@ void desenharTabuleiro() {
     printf("\n");
 }
 
-int tabuleiroCheio() {
+int tabuleiroCheio(char tabuleiro[TAM][TAM]) {
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
             if (tabuleiro[i][j] == VAZIO) return 1; 
@@ -49,7 +41,7 @@ int tabuleiroCheio() {
     return 0; 
 }
 
-int checarEfeitoRebote(int l, int c, char seu_simbolo) {
+int checarEfeitoRebote(char tabuleiro[TAM][TAM], int l, int c, char seu_simbolo) {
     char vizinhos[4];
     int qtd = 0;
     
@@ -66,8 +58,7 @@ int checarEfeitoRebote(int l, int c, char seu_simbolo) {
     return 0;
 }
 
-// Checa se alguma peça está colada na uzumaki
-int checarMaldicao(int l, int c) {
+int checarMaldicao(char tabuleiro[TAM][TAM], int l, int c) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             int nl = l + i;
@@ -80,25 +71,24 @@ int checarMaldicao(int l, int c) {
     return 0;
 }
 
-// Função: uzumaki espalha sua maldição pelo tabuleiro
-void espalharMaldicaoUzumaki(int l, int c) {
+void espalharMaldicaoUzumaki(char tabuleiro[TAM][TAM], int l, int c, 
+                             int *p1_amaldicoado, int *p1_mal_l, int *p1_mal_c,
+                             int *p2_amaldicoado, int *p2_mal_l, int *p2_mal_c) {
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             int nl = l + i;
             int nc = c + j;
             if (nl >= 0 && nl < TAM && nc >= 0 && nc < TAM) {
-                // Se encostar no Jogador 1, amaldiçoa a peça dele
-                if (tabuleiro[nl][nc] == P1 && !p1_amaldicoado) {
-                    p1_amaldicoado = 1;
-                    p1_mal_l = nl;
-                    p1_mal_c = nc;
+                if (tabuleiro[nl][nc] == P1 && !(*p1_amaldicoado)) {
+                    *p1_amaldicoado = 1;
+                    *p1_mal_l = nl;
+                    *p1_mal_c = nc;
                     printf("** A espiral do Uzumaki encostou na peca do Jogador 1 em [%d, %d] e a amaldicoou! **\n", nl + 1, nc + 1);
                 }
-                // Se encostar no Jogador 2, amaldiçoa a peça dele
-                if (tabuleiro[nl][nc] == P2 && !p2_amaldicoado) {
-                    p2_amaldicoado = 1;
-                    p2_mal_l = nl;
-                    p2_mal_c = nc;
+                if (tabuleiro[nl][nc] == P2 && !(*p2_amaldicoado)) {
+                    *p2_amaldicoado = 1;
+                    *p2_mal_l = nl;
+                    *p2_mal_c = nc;
                     printf("** A espiral do Uzumaki encostou na peca do Jogador 2 em [%d, %d] e a amaldicoou! **\n", nl + 1, nc + 1);
                 }
             }
@@ -106,7 +96,7 @@ void espalharMaldicaoUzumaki(int l, int c) {
     }
 }
 
-int checarVitoria(char simbolo) {
+int checarVitoria(char tabuleiro[TAM][TAM], char simbolo) {
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j <= TAM - 4; j++) {
             if (tabuleiro[i][j] == simbolo && tabuleiro[i][j+1] == simbolo && 
@@ -130,7 +120,9 @@ int checarVitoria(char simbolo) {
     return 0;
 }
 
-void jogadaUzumaki() {
+void jogadaUzumaki(char tabuleiro[TAM][TAM], 
+                   int *p1_amaldicoado, int *p1_mal_l, int *p1_mal_c,
+                   int *p2_amaldicoado, int *p2_mal_l, int *p2_mal_c) {
     int l, c;
     printf("--- Turno do Uzumaki (@) ---\n");
     
@@ -146,11 +138,10 @@ void jogadaUzumaki() {
     tabuleiro[l][c] = UZUMAKI;
     printf("O Uzumaki expandiu sua espiral em [%d, %d]!\n", l + 1, c + 1);
     
-    // Ativa a contaminaçao da uzumaki
-    espalharMaldicaoUzumaki(l, c);
+    espalharMaldicaoUzumaki(tabuleiro, l, c, p1_amaldicoado, p1_mal_l, p1_mal_c, p2_amaldicoado, p2_mal_l, p2_mal_c);
 }
 
-void turnoHumano(int jogadorNum, char simbolo, int *perde_vez, int *amaldicoado, int *mal_l, int *mal_c) {
+void turnoHumano(char tabuleiro[TAM][TAM], int jogadorNum, char simbolo, int *perde_vez, int *amaldicoado, int *mal_l, int *mal_c) {
     int l, c;
     printf("--- Turno do Jogador %d (%c) ---\n", jogadorNum, simbolo);
 
@@ -166,11 +157,11 @@ void turnoHumano(int jogadorNum, char simbolo, int *perde_vez, int *amaldicoado,
                 tabuleiro[*mal_l][*mal_c] = VAZIO; 
                 tabuleiro[nova_l][nova_c] = simbolo; 
                 
-                if (checarEfeitoRebote(nova_l, nova_c, simbolo)) {
+                if (checarEfeitoRebote(tabuleiro, nova_l, nova_c, simbolo)) {
                     printf(">> Efeito Rebote! Voce colou em um simbolo inimigo ao mover. Perdera o proximo turno!\n");
                     *perde_vez = 1;
                 }
-                if (checarMaldicao(nova_l, nova_c)) {
+                if (checarMaldicao(tabuleiro, nova_l, nova_c)) {
                     printf("** A peca continuou encostada no Uzumaki e segue amaldicoada!\n");
                     *mal_l = nova_l; *mal_c = nova_c;
                 } else {
@@ -191,11 +182,11 @@ void turnoHumano(int jogadorNum, char simbolo, int *perde_vez, int *amaldicoado,
         if (l >= 0 && l < TAM && c >= 0 && c < TAM && tabuleiro[l][c] == VAZIO) {
             tabuleiro[l][c] = simbolo;
 
-            if (checarEfeitoRebote(l, c, simbolo)) {
+            if (checarEfeitoRebote(tabuleiro, l, c, simbolo)) {
                 printf(">> EFEITO REBOTE! Voce colou em um simbolo inimigo. O Uzumaki jogara duas vezes!\n");
                 *perde_vez = 1;
             }
-            if (checarMaldicao(l, c)) {
+            if (checarMaldicao(tabuleiro, l, c)) {
                 printf("** MALDICAO DA ESPIRAL! Peca em [%d, %d] amaldicoada.\n", l + 1, c + 1);
                 *amaldicoado = 1;
                 *mal_l = l; *mal_c = c;
@@ -208,7 +199,14 @@ void turnoHumano(int jogadorNum, char simbolo, int *perde_vez, int *amaldicoado,
 
 int main() {
     srand(time(NULL));
-    inicializarTabuleiro();
+
+    char tabuleiro[TAM][TAM];
+    int p1_perde_vez = 0, p2_perde_vez = 0;
+    int p1_amaldicoado = 0, p2_amaldicoado = 0;
+    int p1_mal_l = -1, p1_mal_c = -1; 
+    int p2_mal_l = -1, p2_mal_c = -1; 
+
+    inicializarTabuleiro(tabuleiro);
     
     int turno = 1; 
     int jogo_rodando = 1;
@@ -218,7 +216,7 @@ int main() {
     printf("=========================================\n");
 
     while (jogo_rodando) {
-        desenharTabuleiro();
+        desenharTabuleiro(tabuleiro);
 
         if (turno == 1) {
             if (p1_perde_vez) {
@@ -227,9 +225,9 @@ int main() {
                 turno = 2; 
                 continue;
             }
-            turnoHumano(1, P1, &p1_perde_vez, &p1_amaldicoado, &p1_mal_l, &p1_mal_c);
-            if (checarVitoria(P1)) { 
-                desenharTabuleiro(); 
+            turnoHumano(tabuleiro, 1, P1, &p1_perde_vez, &p1_amaldicoado, &p1_mal_l, &p1_mal_c);
+            if (checarVitoria(tabuleiro, P1)) { 
+                desenharTabuleiro(tabuleiro); 
                 printf("!! Fim da obsessao! Jogador 1 (A) venceu! !!\n"); 
                 jogo_rodando = 0; 
             }
@@ -242,26 +240,26 @@ int main() {
                 turno = 3; 
                 continue;
             }
-            turnoHumano(2, P2, &p2_perde_vez, &p2_amaldicoado, &p2_mal_l, &p2_mal_c);
-            if (checarVitoria(P2)) { 
-                desenharTabuleiro(); 
+            turnoHumano(tabuleiro, 2, P2, &p2_perde_vez, &p2_amaldicoado, &p2_mal_l, &p2_mal_c);
+            if (checarVitoria(tabuleiro, P2)) { 
+                desenharTabuleiro(tabuleiro); 
                 printf("!! Fim da obsessao! Jogador 2 (B) venceu! !!\n"); 
                 jogo_rodando = 0; 
             }
             turno = 3;
         } 
         else if (turno == 3) {
-            jogadaUzumaki();
-            if (checarVitoria(UZUMAKI)) { 
-                desenharTabuleiro(); 
+            jogadaUzumaki(tabuleiro, &p1_amaldicoado, &p1_mal_l, &p1_mal_c, &p2_amaldicoado, &p2_mal_l, &p2_mal_c);
+            if (checarVitoria(tabuleiro, UZUMAKI)) { 
+                desenharTabuleiro(tabuleiro); 
                 printf("** O UZUMAKI ALINHOU 4 ESPIRAIS! A maldicao consumiu a todos. Os humanos perderam! **\n"); 
                 jogo_rodando = 0; 
             }
             turno = 1;
         }
 
-        if (jogo_rodando && !tabuleiroCheio()) {
-            desenharTabuleiro();
+        if (jogo_rodando && !tabuleiroCheio(tabuleiro)) {
+            desenharTabuleiro(tabuleiro);
             printf("## O tabuleiro foi completamente distorcido. Empate caotico. ##\n");
             jogo_rodando = 0;
         }
